@@ -9,15 +9,14 @@ import SwiftUI
 import SwiftData
 
 struct BookmarkScreen: View {
-    @Query var bookdata: [Books]
+    var bookData: [Books]
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
-    
     var body: some View {
         List {
-            ForEach(bookdata , id: \.title) { book in
-                BookComponent(book: book)
+            ForEach(bookData , id: \.title) { book in
+                BookComponent(bookData: book, index: 0)
                     .listRowBackground(
                         RoundedRectangle(cornerRadius: 10)
                             .foregroundColor(colorScheme == .dark ? .gray : .white)
@@ -27,7 +26,7 @@ struct BookmarkScreen: View {
                     .swipeActions(edge: .trailing){
                         ZStack{
                             Button {
-                                removeBook(title: book.title, books: bookdata, modelContext: modelContext)
+                                removeBook(title: book.title, books: bookData, modelContext: modelContext)
                             }label: {
                                 Image(systemName: "bookmark.fill")
                             }

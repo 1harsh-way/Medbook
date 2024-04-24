@@ -51,6 +51,10 @@ struct LaunchScreen: View {
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
             .accentColor(.black)
             .navigationBarBackButtonHidden()
+            .onAppear() {
+                UserDefaults.standard.removeObject(forKey: "userInfo")
+                UserDefaults.standard.removeObject(forKey: "defaultCountry")
+            }
     }
 }
 

@@ -8,7 +8,7 @@
 import Foundation
 
 @MainActor
-class UserAuthViewModel:ObservableObject {
+class UserAuthViewModel: ObservableObject {
     
     @Published var isLengthValid: Bool = false
     @Published var isUppercaseValid: Bool = false
@@ -20,7 +20,7 @@ class UserAuthViewModel:ObservableObject {
     @Published var code: String = ""
     @Published var isUserReadyToSignUp: Bool = false
     @Published var defaultCountry: String?
-    @Published var isShowingDetailView = false
+    @Published var isShowingDetailView: Bool = false
     
     func validateUserSignupState() {
         isLengthValid = password.count >= 8

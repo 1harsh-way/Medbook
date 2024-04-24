@@ -8,11 +8,22 @@
 import SwiftUI
 import SwiftData
 
-@frozen public enum SignUpResult {
+enum SignUpResult {
     case completed
-    case failed
+    case failed(error: SignUpError)
+}
+enum SignUpError: Error {
+    case userAlreadyExists
+    case userDoesNotExist
+    case incorrectPassword
+    case noData
 }
 
+struct ErrorMessage: Error {
+    let message: String
+}
+
+@MainActor
 class APIManager: ObservableObject {
     @Published var defaultCountryIndex: Int = 0
     @Published var countries: [Country] = []
@@ -24,33 +35,36 @@ class APIManager: ObservableObject {
         return UserDefaults.standard.string(forKey: "userInfo")
     }
     
-    
-    func signUp(email: String, password: String, model: ModelContext, user: [User]){
-        if !user.isEmpty {
-            for users in user {
-                if (users.email == email && users.password == password){
-                    setSession(email: email)
-                }
-                else{
-                    let data = User(email: email, password: password)
-                    model.insert(data)
-                    setSession(email: email)
-                }
+    func commonLogin(email: String, password: String, model: ModelContext, user: [User], signUp: Bool) async -> SignUpResult {
+        if user.isEmpty {
+            if signUp {
+                let data = User(email: email, password: password)
+                model.insert(data)
+                return .completed
             }
+            return .failed(error: SignUpError.noData)
         }
-
-    }
-    
-    func login(email: String, password: String, model: ModelContext, user: [User]) async -> SignUpResult{
-        if !user.isEmpty {
-            for users in user {
-                if (users.email == email && users.password == password){
-                    setSession(email: email)
+        
+        if let existingUser = user.first(where: { $0.email == email }) {
+            if signUp {
+                return .failed(error: SignUpError.userAlreadyExists)
+            }
+            else {
+                if existingUser.password == password {
                     return SignUpResult.completed
+                } else {
+                    return .failed(error: SignUpError.incorrectPassword)
                 }
             }
         }
-        return SignUpResult.failed
+        else if signUp {
+            let data = User(email: email, password: password)
+            model.insert(data)
+            return .completed
+        }
+        else{
+            return .failed(error: .userDoesNotExist)
+        }
     }
     
     func fetchCountryData(model: ModelContext, countrydata: [Country]) {

@@ -6,52 +6,59 @@
 //
 
 import SwiftUI
+
 struct BookComponent: View {
-    var book:Books?
-    @Environment(\.colorScheme) var colorScheme
-    
+    var bookData: Books?
+    @State var showAnimation: Bool = false
+    @Environment(\.colorScheme) private var colorScheme
+    var index: Int
     var body: some View {
-        HStack(alignment: .center){
-            if let coverImage = book?.coverImage,let url = URL(string:"https://covers.openlibrary.org/b/id/\(coverImage)-S.jpg"){
-                ImageCache(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 70, height:70)
-                        .cornerRadius(10)
-                } placeholder: {
-                    ProgressView()
-                        .frame(width: 70, height:70)
-                }
-            }else{
-                Image(systemName: "globe")
-            }
-            VStack(alignment: .leading){
-                Text(String(book?.title ?? ""))
-                    .padding(.bottom,3)
-                
-                HStack{
-                    Text(String(book?.authorName.first ?? ""))
-                        .lineLimit(1)
-                        .font(.system(size:14,weight: .light))
-                        .foregroundColor(.gray)
-                    
-                    HStack{
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.yellow)
-                        
-                        Text("\(book?.ratingsAverage ?? 0,specifier:"%.2f")")
-                            .font(.system(size:15,weight: .light))
+            VStack(alignment: .center) {
+                HStack(spacing: 18) {
+                    AsyncImage(url: URL(string:"https://covers.openlibrary.org/b/id/\(bookData?.coverImage ?? 0)-S.jpg")){ image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 65, height:65)
+                            .cornerRadius(8)
+                    } placeholder: {
+                        ProgressView()
+                            .frame(width: 70, height:70)
                     }
-                    HStack{
-                        Image(systemName: "chart.bar.doc.horizontal")
-                            .foregroundColor(.yellow)
-                        Text("\(book?.ratingsCount ?? 0)")
-                            .font(.system(size:15,weight: .light))
+                    VStack(alignment: .leading) {
+                        Text(bookData?.title ?? "")
+                            .lineLimit(1)
+                            .foregroundColor(.black)
+                        HStack {
+                            Text(bookData?.authorName.first ?? "")
+                                .lineLimit(1)
+                                .font(.system(size:14,weight: .light))
+                                .foregroundColor(colorScheme == .dark ? .black :.gray)
+                            Spacer()
+                            HStack{
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(.yellow)
+                                Text("\(bookData?.ratingsAverage ?? 0,specifier:"%.1f")")
+                                    .font(.system(size:15,weight: .light))
+                            }
+                            HStack{
+                                Image(systemName: "chart.bar.doc.horizontal")
+                                    .foregroundColor(.yellow)
+                                Text("\(bookData?.ratingsCount ?? 0)")
+                                    .font(.system(size:15,weight: .light))
+                            }
+                            .fixedSize()
+                            .padding(.trailing, 6)
+                        }
+                    }
+                }
+                .padding(.all, 10)
+                .opacity(showAnimation ? 1 : 0)
+                .onAppear {
+                    withAnimation(Animation.easeInOut(duration: 0.3).delay(Double(index) * 0.05)) {
+                        showAnimation = true
                     }
                 }
             }
-            
-        }.frame(minHeight: 80 ,alignment: .leading)
     }
 }
